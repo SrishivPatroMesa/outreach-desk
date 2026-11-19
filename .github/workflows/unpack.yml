@@ -1,0 +1,24 @@
+name: Unpack project
+on:
+  push:
+    paths: ["outreach-desk.zip", ".github/workflows/unpack.yml"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip the project into the repo root
+        run: |
+          [ -f outreach-desk.zip ] || { echo "No zip, nothing to do"; exit 0; }
+          unzip -q -o outreach-desk.zip -d /tmp/unpacked
+          rm -rf /tmp/unpacked/outreach-desk/.github
+          cp -a /tmp/unpacked/outreach-desk/. .
+          git rm -q outreach-desk.zip
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Unpack outreach-desk.zip"
+          git push
